@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="80dp"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="20dp"
+    android:layout_marginRight="20dp"
+    android:gravity="center_horizontal"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/mytexttitle"
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:text="血糖最低值"
+        android:textColor="@color/qmui_config_color_gray_7"
+        android:gravity="center"
+        android:textSize="20sp"/>
+
+    <TextView
+        android:id="@+id/mytextcontent"
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="100"
+        android:textColor="?attr/colorAccent"
+        android:gravity="center"
+        android:textSize="16sp" />
+
+</LinearLayout>

@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">血糖仪</string>
+    <string name="string_settingrefreshing">扫描蓝牙中...</string>
+    <string name="string_settingtitle">设备列表</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>
