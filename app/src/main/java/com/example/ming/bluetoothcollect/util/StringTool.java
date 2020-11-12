@@ -42,6 +42,8 @@ public class StringTool {
         return  "02"+year+month+day+hour+minutes+second+"00";
     }
 
+
+
     private static String intToHex(int n) {
         StringBuffer s = new StringBuffer();
         String a;
