@@ -65,7 +65,7 @@ public class BluetoothTool {
                 return  false;
             }
         }else{//不支持蓝牙模块
-            Toast.makeText(MainApplication.getContext(), "该设备不支持蓝牙或没有蓝牙模块", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "该设备不支持蓝牙或没有蓝牙模块", Toast.LENGTH_SHORT).show();
             return  false;
         }
     }

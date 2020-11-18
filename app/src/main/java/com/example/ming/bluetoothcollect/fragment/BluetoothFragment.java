@@ -77,7 +77,6 @@ public class BluetoothFragment extends BaseFragment {
     private void initList() {
         //初始化蓝牙设备
         mDevices = new ArrayList<SearchResult>();
-
         mListView.setLayoutManager(new LinearLayoutManager(getContext()) {
             @Override
             public RecyclerView.LayoutParams generateDefaultLayoutParams() {
@@ -85,7 +84,6 @@ public class BluetoothFragment extends BaseFragment {
                         ViewGroup.LayoutParams.WRAP_CONTENT);
             }
         });
-
         mAdapter = new BaseRecyclerAdapter<SearchResult>(getActivity(), null) {
             @Override
             public int getItemLayoutId(int viewType) {
@@ -98,7 +96,7 @@ public class BluetoothFragment extends BaseFragment {
             }
 
         };
-
+        //连接蓝牙
         mAdapter.setOnItemClickListener(new BaseRecyclerAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View itemView, final int pos) {
@@ -138,7 +136,7 @@ public class BluetoothFragment extends BaseFragment {
                                                 }
                                             }
                                             //添加
-                                            DeviceInfo deviceInfo = new DeviceInfo(null,item.getAddress(),item.getName(),true);
+                                            DeviceInfo deviceInfo = new DeviceInfo(null,item.getAddress(),item.getName(),null,null);
                                             DbManager.getClient().insertDeviceInfo(deviceInfo,items);
                                             popBackStack();
                                         }
@@ -154,20 +152,17 @@ public class BluetoothFragment extends BaseFragment {
 
             }
         });
-
         mListView.setAdapter(mAdapter);
-
+        //下拉选择
         mPullRefreshLayout.setOnPullListener(new QMUIPullRefreshLayout.OnPullListener() {
             @Override
             public void onMoveTarget(int offset) {
 
             }
-
             @Override
             public void onMoveRefreshView(int offset) {
 
             }
-
             @Override
             public void onRefresh() {
                 searchDevice();
@@ -175,6 +170,7 @@ public class BluetoothFragment extends BaseFragment {
         });
     }
 
+    //搜索设备
     private void searchDevice() {
         ClientManager.getClient().search(BluetoothTool.getSearchRequest(), mSearchResponse);
     }

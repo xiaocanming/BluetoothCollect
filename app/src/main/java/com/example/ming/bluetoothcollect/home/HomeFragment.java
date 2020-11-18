@@ -14,6 +14,7 @@ import com.example.ming.bluetoothcollect.R;
 import com.example.ming.bluetoothcollect.base.BaseFragment;
 import com.example.ming.bluetoothcollect.controller.ClientManager;
 import com.example.ming.bluetoothcollect.controller.DbManager;
+import com.example.ming.bluetoothcollect.custom.NoSlidingViewPager;
 import com.example.ming.bluetoothcollect.model.Device;
 import com.qmuiteam.qmui.util.QMUIDisplayHelper;
 import com.qmuiteam.qmui.widget.tab.QMUITab;
@@ -28,7 +29,7 @@ import butterknife.ButterKnife;
 public class  HomeFragment extends BaseFragment {
 
     @BindView(R.id.main_view_pager)
-    ViewPager mViewPager;
+    NoSlidingViewPager mViewPager;
     @BindView(R.id.tabs)
     QMUITabSegment mTabSegment;
     private HashMap<Pager, HomeController> mPages;
@@ -177,7 +178,7 @@ public class  HomeFragment extends BaseFragment {
     //断开蓝牙连接
     @Override
     public void onDestroy() {
-        Device newUseDevice= DbManager.getClient().searchIsUseDevice();
+        Device newUseDevice= DbManager.getClient().searchDeviceInfo();
         ClientManager.getClient().disconnect(newUseDevice.getAddress());
         super.onDestroy();
     }

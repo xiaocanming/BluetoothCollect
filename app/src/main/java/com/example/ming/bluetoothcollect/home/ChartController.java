@@ -81,7 +81,10 @@ public class ChartController extends HomeController {
         mTopBar.addRightImageButton(R.mipmap.icon_topbar_date, QMUIViewHelper.generateViewId()).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                pvTime.show();
+//                pvTime.show();
+                // 添加数据
+                setData(30, 150);
+                chart.invalidate();
             }
         });
     }
@@ -109,7 +112,7 @@ public class ChartController extends HomeController {
         pvTime = new TimePickerView.Builder(getContext(), new TimePickerView.OnTimeSelectListener() {
             @Override
             public void onTimeSelect(Date date, View v) {//选中事件回调
-                setData(25, 150);
+                setData(24, 150);
                 //刷新
                 chart.animateX(1500);
                 Legend l = chart.getLegend();
@@ -140,12 +143,12 @@ public class ChartController extends HomeController {
             //显示边界
             chart.setDrawBorders(false);
             // 设置拖拽、缩放等
-            chart.setDragEnabled(false);
-            chart.setScaleEnabled(false);
-            chart.setScaleXEnabled(false);
+            chart.setDragEnabled(true);
+//            chart.setScaleEnabled(true);
+            chart.setScaleXEnabled(true);
             chart.setScaleYEnabled(false);
             // 设置双指缩放
-            chart.setPinchZoom(false);
+//            chart.setPinchZoom(true);
             // 创建标记以在选定值时显示框
             MyMarkerView mv = new MyMarkerView(getContext(), R.layout.custom_marker_view);
             // 将标记设置为图表
@@ -195,7 +198,7 @@ public class ChartController extends HomeController {
             yAxis.addLimitLine(ll2);
         }
         // 添加数据
-        setData(25, 150);
+        setData(10, 150);
         // 随着时间推移绘制点
         chart.animateX(1500);
         // 获取图例（仅在设置数据后才可能）

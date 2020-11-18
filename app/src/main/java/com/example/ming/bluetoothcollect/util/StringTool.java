@@ -5,6 +5,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 public class StringTool {
+
     //16字符串字符串转时间
     public static String getDateStringByString(String date){
         //获取年
@@ -24,46 +25,109 @@ public class StringTool {
     }
 
     //获取当前时间字符串
-    public  static String getStringByNowDate(){
+    public  static byte[] getBytesByNowDate(){
+        byte[] bytes = new byte[8];
         Calendar calendar = Calendar.getInstance();
+        bytes[0] = (byte) 0x02;
         //获取年
-        String yearString=Integer.toHexString(calendar.get(Calendar.YEAR));
-        String year= (yearString.substring(yearString.length() -2,yearString.length())) ;
+        bytes[1] = (byte) calendar.get(Calendar.YEAR);
         //获取月
-        String month= intToHex(calendar.get(Calendar.MONTH)+1);
+        bytes[2] = (byte) (calendar.get(Calendar.MONTH)+1);
         //获取日
-        String day=  intToHex(calendar.get(Calendar.DAY_OF_MONTH));
+        bytes[3] = (byte) calendar.get(Calendar.DAY_OF_MONTH);
         //获取时
-        String hour=  intToHex(calendar.get(Calendar.HOUR_OF_DAY));
+        bytes[4] = (byte) calendar.get(Calendar.HOUR_OF_DAY);
         //获取分
-        String minutes= intToHex(calendar.get(Calendar.MINUTE));
+        bytes[5] = (byte) calendar.get(Calendar.MINUTE);
         //获取秒
-        String second= intToHex(calendar.get(Calendar.SECOND));
-        return  "02"+year+month+day+hour+minutes+second+"00";
+        bytes[6] = (byte) calendar.get(Calendar.SECOND);
+        return  bytes;
     }
 
+    //获取获取时间字节数组
+    public  static byte[] getBytesByGetDate(){
+        byte[] bytes = new byte[8];
+        bytes[0] = (byte) 0x01;
+        return bytes;
+    }
 
+    //获取获取时间字节数组
+    public  static byte[] getBytesByGetBattery(){
+        byte[] bytes = new byte[8];
+        bytes[0] = (byte) 0x04;
+        return bytes;
+    }
 
-    private static String intToHex(int n) {
-        StringBuffer s = new StringBuffer();
-        String a;
-        char []b = {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
-        while(n != 0){
-            s = s.append(b[n%16]);
-            n = n/16;
+    //获取获取时间字节数组
+    public  static byte[] getBytesBySetInterval(int dayinterval, int negihtinterval){
+        byte[] bytes = new byte[20];
+        bytes[6] = (byte) dayinterval;
+        bytes[7] = (byte) negihtinterval;
+        return bytes;
+    }
+
+    //根据bytes获取Date
+    public static Double getBatteryByBytes(byte[] value){
+        try {
+            Double battery=Double.valueOf(byte2short(value,1));
+            return battery;
+        }catch (Exception e){
+            return  null;
         }
-        a = s.reverse().toString();
-        a  = add_zore(a,2);
-        return a;
     }
 
-    public static String add_zore(String str, int size){
-        if (str.length()<size){
+    //根据bytes获取Date
+    public static Date getDataByBytes(byte[] value,int StarIndex){
+       try {
+           byte[] yearall=new byte[2];
+           yearall[0]=(byte) 0x07;
+           yearall[1]=value[StarIndex];
+           int yyyy=byte2short(yearall,0);
+           int MM=ByteInt_Single(value[StarIndex+1]);
+           int dd=ByteInt_Single(value[StarIndex+2]);
+           int HH=ByteInt_Single(value[StarIndex+3]);
+           int mm=ByteInt_Single(value[StarIndex+4]);
+           int ss=ByteInt_Single(value[StarIndex+5]);
+
+           SimpleDateFormat simFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+           Date dtBeg = simFormat.parse(String.valueOf(yyyy)+add_zore(MM)+add_zore(dd)+add_zore(HH)+add_zore(mm)+add_zore(ss));
+           return dtBeg;
+       }catch (Exception e){
+           return  null;
+       }
+    }
+
+    public static String add_zore(int intstr){
+        String str=String.valueOf(intstr);
+        if (str.length()<2){
             str= "0"+str;
-            str=add_zore(str,size);
             return str;
         }else {
             return str;
         }
+    }
+
+    /**
+     * 转换byte数组为short（大端）
+     *
+     * @return
+     */
+    public static short byte2short(byte[] b,int startindex){
+        short l = 0;
+        for (int i = 0; i < 2; i++) {
+            l<<=8; //<<=和我们的 +=是一样的，意思就是 l = l << 8
+            l |= (b[startindex+i] & 0xff); //和上面也是一样的  l = l | (b[i]&0xff)
+        }
+        return l;
+    }
+
+    /**
+     * 转换byte为int (单字节)
+     *
+     * @return
+     */
+    public static int ByteInt_Single(byte byte1) {
+        int iRst = (byte1 & 0xFF);
+        return iRst;
     }
 }

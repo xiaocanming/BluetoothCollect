@@ -1,9 +1,14 @@
 package com.example.ming.bluetoothcollect.model;
 
+import com.example.ming.bluetoothcollect.util.StringDateConverter;
+
+import org.greenrobot.greendao.annotation.Convert;
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.Index;
 import org.greenrobot.greendao.annotation.Generated;
+
+import java.util.Date;
 
 @Entity
 public class DeviceInfo {
@@ -11,18 +16,23 @@ public class DeviceInfo {
     private Long id;
 
     @Index(unique = true)//设置唯一性
-    private String address;//人员编号
+    private String address;//设备地址
 
-    private String name;//人员姓名
+    private String name;//设备名称
 
-    private boolean isuse;//人员姓名
+    @Convert(converter = StringDateConverter.class, columnType = String.class)
+    private Date time; //设备时间
 
-    @Generated(hash = 863249134)
-    public DeviceInfo(Long id, String address, String name, boolean isuse) {
+    private Double battery;//电量
+
+    @Generated(hash = 1940866757)
+    public DeviceInfo(Long id, String address, String name, Date time,
+            Double battery) {
         this.id = id;
         this.address = address;
         this.name = name;
-        this.isuse = isuse;
+        this.time = time;
+        this.battery = battery;
     }
 
     @Generated(hash = 2125166935)
@@ -53,12 +63,20 @@ public class DeviceInfo {
         this.name = name;
     }
 
-    public boolean getIsuse() {
-        return this.isuse;
+    public Date getTime() {
+        return this.time;
     }
 
-    public void setIsuse(boolean isuse) {
-        this.isuse = isuse;
+    public void setTime(Date time) {
+        this.time = time;
+    }
+
+    public Double getBattery() {
+        return this.battery;
+    }
+
+    public void setBattery(Double battery) {
+        this.battery = battery;
     }
 
 }

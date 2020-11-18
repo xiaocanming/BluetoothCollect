@@ -45,9 +45,4 @@ public class MainApplication extends Application {
         BluetoothContext.set(this);
     }
 
-
-
-
-
-
 }

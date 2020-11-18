@@ -16,24 +16,25 @@ public class NotifyInfo {
 
     private String address;
 
-    private String service;
-
-    private String character;
-
     @Convert(converter = StringDateConverter.class, columnType = String.class)
     private Date createtime;
 
-    private String  message;
+    @Convert(converter = StringDateConverter.class, columnType = String.class)
+    private Date time;
 
-    @Generated(hash = 443305637)
-    public NotifyInfo(Long id, String address, String service, String character,
-            Date createtime, String message) {
+    private Double  message;
+
+    private int  type;//1实时数据 2历史数据
+
+    @Generated(hash = 14744991)
+    public NotifyInfo(Long id, String address, Date createtime, Date time,
+            Double message, int type) {
         this.id = id;
         this.address = address;
-        this.service = service;
-        this.character = character;
         this.createtime = createtime;
+        this.time = time;
         this.message = message;
+        this.type = type;
     }
 
     @Generated(hash = 859430374)
@@ -56,22 +57,6 @@ public class NotifyInfo {
         this.address = address;
     }
 
-    public String getService() {
-        return this.service;
-    }
-
-    public void setService(String service) {
-        this.service = service;
-    }
-
-    public String getCharacter() {
-        return this.character;
-    }
-
-    public void setCharacter(String character) {
-        this.character = character;
-    }
-
     public Date getCreatetime() {
         return this.createtime;
     }
@@ -80,12 +65,28 @@ public class NotifyInfo {
         this.createtime = createtime;
     }
 
-    public String getMessage() {
+    public Date getTime() {
+        return this.time;
+    }
+
+    public void setTime(Date time) {
+        this.time = time;
+    }
+
+    public Double getMessage() {
         return this.message;
     }
 
-    public void setMessage(String message) {
+    public void setMessage(Double message) {
         this.message = message;
+    }
+
+    public int getType() {
+        return this.type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
     }
 
 }

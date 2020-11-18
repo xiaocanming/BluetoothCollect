@@ -2,11 +2,6 @@ package com.example.ming.bluetoothcollect.controller;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
-import android.view.ViewGroup;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 
 import com.example.ming.bluetoothcollect.model.DaoMaster;
 import com.example.ming.bluetoothcollect.model.DaoSession;
@@ -18,16 +13,9 @@ import com.example.ming.bluetoothcollect.model.DeviceInfoDao;
 import com.example.ming.bluetoothcollect.model.DeviceService;
 import com.example.ming.bluetoothcollect.model.NotifyInfo;
 import com.example.ming.bluetoothcollect.model.NotifyInfoDao;
-import com.inuker.bluetooth.library.model.BleGattCharacter;
-import com.inuker.bluetooth.library.model.BleGattService;
-import com.qmuiteam.qmui.widget.grouplist.QMUICommonListItemView;
-import com.qmuiteam.qmui.widget.grouplist.QMUIGroupListView;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
+import java.util.Date;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.UUID;
 
 public class DbController {
@@ -102,32 +90,41 @@ public class DbController {
      * @param deviceDetailInfoList
      */
     public void insertDeviceInfo(DeviceInfo deviceInfo,List<DeviceDetailInfo> deviceDetailInfoList){
-        //更改其他使用设备
-        List<DeviceInfo>personInfors = (List<DeviceInfo>) deviceInfoDao.queryBuilder().where(DeviceInfoDao.Properties.Isuse.eq(true)).list();
-        if(personInfors!=null){
-            for (DeviceInfo device:personInfors) {
-                device.setIsuse(false);
-                deviceInfoDao.update(device);
+        //删除所有数据
+        deviceInfoDao.deleteAll();
+        deviceDetailInfoDao.deleteAll();
+        //新增设备数据
+        deviceInfoDao.insert(deviceInfo);
+        deviceDetailInfoDao.insertInTx(deviceDetailInfoList);
+    }
+
+    /**
+     * 修改蓝牙信息
+     * @param time
+     * @param battery
+     */
+    public void updateDeviceInfo(Date time,Double battery){
+        //获取设备信息
+        DeviceInfo deviceInfos = deviceInfoDao.queryBuilder().build().unique();//拿到之前的记录
+        if(deviceInfos!=null){
+            if(time!=null){
+                deviceInfos.setTime(time);
+
+            }
+            if(battery!=null){
+                deviceInfos.setBattery(battery);
             }
         }
-        //新增设备
-        //判断设备是否存在
-        DeviceInfo olddeviceInfo = deviceInfoDao.queryBuilder().where(DeviceInfoDao.Properties.Address.eq(deviceInfo.getAddress())).build().unique();
-        if(olddeviceInfo!=null){
-            olddeviceInfo.setIsuse(true);
-            deviceInfoDao.update(olddeviceInfo);
-        }else {
-            deviceInfoDao.insert(deviceInfo);
-            deviceDetailInfoDao.insertInTx(deviceDetailInfoList);
-        }
+        deviceInfoDao.update(deviceInfos);
     }
 
     /**
      * 获取正在使用的蓝牙设备
      */
-    public Device searchIsUseDevice(){
+    public Device searchDeviceInfo(){
         Device device=new Device();
-        List<DeviceInfo>deviceInfos = (List<DeviceInfo>) deviceInfoDao.queryBuilder().where(DeviceInfoDao.Properties.Isuse.eq(true)).list();
+        //获取设备信息
+        List<DeviceInfo>deviceInfos = (List<DeviceInfo>) deviceInfoDao.queryBuilder().list();
         if(deviceInfos.size()>0){
             device.setAddress(deviceInfos.get(0).getAddress());
             device.setName(deviceInfos.get(0).getName());
@@ -137,14 +134,12 @@ public class DbController {
                 if(deviceDetailInfo.getType()==1){
                     if(deviceDetailInfo.getCharacter().toString().contains("ffe1")){
                         DeviceService item=new DeviceService();
-                        item.setType(1);
                         item.setService(deviceDetailInfo.getService().equals("") ?null:UUID.fromString(deviceDetailInfo.getService()));
                         item.setCharacter( deviceDetailInfo.getCharacter().equals("") ?null: UUID.fromString(deviceDetailInfo.getCharacter()));
                         device.setCollectdeviceservice(item);
                     }
                     if(deviceDetailInfo.getCharacter().toString().contains("fff6")){
                         DeviceService item=new DeviceService();
-                        item.setType(2);
                         item.setService(deviceDetailInfo.getService().equals("") ?null:UUID.fromString(deviceDetailInfo.getService()));
                         item.setCharacter( deviceDetailInfo.getCharacter().equals("") ?null: UUID.fromString(deviceDetailInfo.getCharacter()));
                         device.setDatedeviceservice(item);
@@ -174,6 +169,5 @@ public class DbController {
         List<NotifyInfo>notifyInfos = (List<NotifyInfo>) notifyInfoDao.queryBuilder().where(NotifyInfoDao.Properties.Address.eq(address)).list();
         return notifyInfos;
     }
-
 
 }
