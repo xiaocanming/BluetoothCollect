@@ -132,7 +132,7 @@ class RealDataThread implements Runnable { // 实现Runnable接口，作为线�
 
     public void run() {  // 覆写run()方法，作为线程 的操作主体
         DbController mClient = DbManager.getClient();
-        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd");
         //获取数据开始时间
         Date startDate = StringTool.getDataByBytes(value, 0);
         List<NotifyInfo> NotifyInfoList = new ArrayList<>();
@@ -140,10 +140,10 @@ class RealDataThread implements Runnable { // 实现Runnable接口，作为线�
             //判断时间为白天还是晚上
             NotifyInfo info = new NotifyInfo();
             info.setType(1);
-            info.setCreatetime(calendar.getTime());
             info.setTime(startDate);
+            info.setCreatedate(fmt.format(startDate));
             info.setAddress(address);
-            info.setMessage(Double.valueOf(StringTool.byte2short(value, i)));
+            info.setMessage(Float.valueOf(StringTool.byte2short(value, i)));
             Calendar cal = Calendar.getInstance();
             cal.setTime(startDate);
             startDate = new Date(startDate.getTime() + 100 * 1);
@@ -175,14 +175,15 @@ class HistoryDataThread implements Runnable { // 实现Runnable接口，作为�
         //获取晚间隔
         int negihtinterval = StringTool.ByteInt_Single(value[15]);
         List<NotifyInfo> NotifyInfoList = new ArrayList<>();
+        SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd");
         for (int i = 16; i < value.length - 8; i = i + 2) {
             //判断时间为白天还是晚上
             NotifyInfo info = new NotifyInfo();
             info.setType(2);
-            info.setCreatetime(calendar.getTime());
             info.setTime(startDate);
+            info.setCreatedate(fmt.format(startDate));
             info.setAddress(address);
-            info.setMessage(Double.valueOf(StringTool.byte2short(value, i)));
+            info.setMessage(Float.valueOf(StringTool.byte2short(value, i)));
             Calendar cal = Calendar.getInstance();
             cal.setTime(startDate);
             if (6 < cal.HOUR_OF_DAY && cal.HOUR_OF_DAY < 18) {

@@ -192,23 +192,23 @@ public class SettingController extends HomeController {
         public void onClick(View v) {
             if (v instanceof QMUICommonListItemView) {
                 if (isUseDevice != null) {
-                    List<NotifyInfo> notifyInfos = DbManager.getClient().searchNotifyInfoByWhere(isUseDevice.getAddress());
-                    String message = "";
-                    for (NotifyInfo notifyInfo : notifyInfos) {
-                        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSSS");
-                        message += format.format(notifyInfo.getTime()) + "--" + String.format("%s", String.valueOf(notifyInfo.getMessage())) + "\n\n";
-                    }
-                    new QMUIDialog.MessageDialogBuilder(getContext())
-                            .setTitle("监听数据")
-                            .setSkinManager(QMUISkinManager.defaultInstance(getContext()))
-                            .setMessage(message)
-                            .addAction("取消", new QMUIDialogAction.ActionListener() {
-                                @Override
-                                public void onClick(QMUIDialog dialog, int index) {
-                                    dialog.dismiss();
-                                }
-                            })
-                            .create(com.qmuiteam.qmui.R.style.QMUI_Dialog).show();
+//                    List<NotifyInfo> notifyInfos = DbManager.getClient().searchNotifyInfoByWhere(isUseDevice.getAddress(),);
+//                    String message = "";
+//                    for (NotifyInfo notifyInfo : notifyInfos) {
+//                        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSSS");
+//                        message += format.format(notifyInfo.getTime()) + "--" + String.format("%s", String.valueOf(notifyInfo.getMessage())) + "\n\n";
+//                    }
+//                    new QMUIDialog.MessageDialogBuilder(getContext())
+//                            .setTitle("监听数据")
+//                            .setSkinManager(QMUISkinManager.defaultInstance(getContext()))
+//                            .setMessage(message)
+//                            .addAction("取消", new QMUIDialogAction.ActionListener() {
+//                                @Override
+//                                public void onClick(QMUIDialog dialog, int index) {
+//                                    dialog.dismiss();
+//                                }
+//                            })
+//                            .create(com.qmuiteam.qmui.R.style.QMUI_Dialog).show();
                 }
             }
         }

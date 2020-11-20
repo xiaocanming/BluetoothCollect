@@ -10,22 +10,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:layout_marginTop="82dp"
+        android:layout_marginTop="?attr/qmui_topbar_height"
         android:background="@color/main_background">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@color/qmui_config_color_white">
-
-            <com.qmuiteam.qmui.widget.QMUIFloatLayout
-                android:id="@+id/qmuidemo_floatlayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                />
-        </LinearLayout>
 
         <com.github.mikephil.charting.charts.LineChart
             android:id="@+id/chart1"
@@ -33,7 +19,6 @@
             android:layout_height="match_parent"
             android:layout_above="@+id/seekBar1"
             />
-
 
     </LinearLayout>
 

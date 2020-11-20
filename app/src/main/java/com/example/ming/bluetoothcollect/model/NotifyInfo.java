@@ -16,22 +16,21 @@ public class NotifyInfo {
 
     private String address;
 
-    @Convert(converter = StringDateConverter.class, columnType = String.class)
-    private Date createtime;
+    private String createdate;
 
     @Convert(converter = StringDateConverter.class, columnType = String.class)
     private Date time;
 
-    private Double  message;
+    private float  message;
 
     private int  type;//1实时数据 2历史数据
 
-    @Generated(hash = 14744991)
-    public NotifyInfo(Long id, String address, Date createtime, Date time,
-            Double message, int type) {
+    @Generated(hash = 1550468051)
+    public NotifyInfo(Long id, String address, String createdate, Date time,
+            float message, int type) {
         this.id = id;
         this.address = address;
-        this.createtime = createtime;
+        this.createdate = createdate;
         this.time = time;
         this.message = message;
         this.type = type;
@@ -57,12 +56,12 @@ public class NotifyInfo {
         this.address = address;
     }
 
-    public Date getCreatetime() {
-        return this.createtime;
+    public String getCreatedate() {
+        return this.createdate;
     }
 
-    public void setCreatetime(Date createtime) {
-        this.createtime = createtime;
+    public void setCreatedate(String createdate) {
+        this.createdate = createdate;
     }
 
     public Date getTime() {
@@ -73,11 +72,11 @@ public class NotifyInfo {
         this.time = time;
     }
 
-    public Double getMessage() {
+    public float getMessage() {
         return this.message;
     }
 
-    public void setMessage(Double message) {
+    public void setMessage(float message) {
         this.message = message;
     }
 

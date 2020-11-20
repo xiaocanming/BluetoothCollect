@@ -14,6 +14,7 @@ import com.example.ming.bluetoothcollect.model.DeviceService;
 import com.example.ming.bluetoothcollect.model.NotifyInfo;
 import com.example.ming.bluetoothcollect.model.NotifyInfoDao;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -46,13 +47,14 @@ public class DbController {
     private DeviceInfoDao deviceInfoDao;
     private NotifyInfoDao notifyInfoDao;
 
+    private static String dbName="bluetooth1.db";
     /**
      * 初始化
      * @param context
      */
     public DbController(Context context) {
         this.context = context;
-        mHelper = new DaoMaster.DevOpenHelper(context,"bluetooth.db", null);
+        mHelper = new DaoMaster.DevOpenHelper(context,dbName, null);
         mDaoMaster =new DaoMaster(getWritableDatabase());
         mDaoSession = mDaoMaster.newSession();
         deviceDetailInfoDao = mDaoSession.getDeviceDetailInfoDao();
@@ -65,7 +67,7 @@ public class DbController {
      */
     private SQLiteDatabase getReadableDatabase(){
         if(mHelper == null){
-            mHelper = new DaoMaster.DevOpenHelper(context,"bluetooth.db",null);
+            mHelper = new DaoMaster.DevOpenHelper(context,dbName,null);
         }
         SQLiteDatabase db =mHelper.getReadableDatabase();
         return db;
@@ -77,7 +79,7 @@ public class DbController {
      */
     private SQLiteDatabase getWritableDatabase(){
         if(mHelper == null){
-            mHelper =new DaoMaster.DevOpenHelper(context,"bluetooth.db",null);
+            mHelper =new DaoMaster.DevOpenHelper(context,dbName,null);
         }
         SQLiteDatabase db = mHelper.getWritableDatabase();
         return db;
@@ -144,10 +146,12 @@ public class DbController {
     }
 
     /**
-     * 按条件查询通知消息
+     * 按设备地址和日期查询通知消息
      */
-    public List<NotifyInfo> searchNotifyInfoByWhere(String address){
-        List<NotifyInfo>notifyInfos = (List<NotifyInfo>) notifyInfoDao.queryBuilder().where(NotifyInfoDao.Properties.Address.eq(address)).list();
+    public List<NotifyInfo> searchNotifyInfoByWhere(String address,Date date){
+        SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd");
+        String dateString=fmt.format(date);
+        List<NotifyInfo>notifyInfos = (List<NotifyInfo>) notifyInfoDao.queryBuilder().where(NotifyInfoDao.Properties.Address.eq(address), NotifyInfoDao.Properties.Createdate.eq(dateString)).list();
         return notifyInfos;
     }
 

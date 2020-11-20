@@ -28,6 +28,7 @@ public class HomeController extends QMUIWindowInsetLayout {
     public void setHomeControlListener(HomeControlListener homeControlListener) {
         mHomeControlListener = homeControlListener;
     }
+
     public interface HomeControlListener {
         void startFragment(BaseFragment fragment);
         void startActivity(Intent intent);
