@@ -67,8 +67,8 @@ public class ChartController extends HomeController {
         ButterKnife.bind(this);
         initTimePicker();
         initTopBar();
+        initGetData();
         initChart();
-//        initGetData();
     }
 
     @Override
@@ -91,6 +91,13 @@ public class ChartController extends HomeController {
                 pvTime.show();
             }
         });
+        mTopBar.addLeftImageButton(R.mipmap.icon_topbar_refench, QMUIViewHelper.generateViewId()).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setData();
+                chart.invalidate();
+            }
+        });
     }
 
     private void initTimePicker() {
@@ -106,7 +113,8 @@ public class ChartController extends HomeController {
             @Override
             public void onTimeSelect(Date date, View v) {//选中事件回调
                 curDate = date;
-//                ui_task.run();
+                setData();
+                chart.invalidate();
             }
         })
                 //年月日时分秒 的显示与否，不设置则默认全部显示
@@ -201,11 +209,6 @@ public class ChartController extends HomeController {
     //对表格设置数据
     private void setData() {
         ArrayList<Entry> values = new ArrayList<>();
-
-
-        //获取当前日期所有数据
-        Calendar calendar = Calendar.getInstance();
-        curDate = calendar.getTime();
         Device device = DbManager.getClient().searchDeviceInfo();
         List<NotifyInfo> notifyInfos = DbManager.getClient().searchNotifyInfoByWhere(device.getAddress(), curDate);
         SimpleDateFormat formatHH = new SimpleDateFormat("HH.mm");
@@ -219,10 +222,16 @@ public class ChartController extends HomeController {
             Entry entry = new Entry(xVale, notifyInfo.getMessage());
             values.add(entry);
         }
-
         values.add(new Entry(0,0));
         LineDataSet set1;
-        if (chart.getData() == null ) {
+        if (chart.getData() != null &&
+                chart.getData().getDataSetCount() > 0) {
+            set1 = (LineDataSet) chart.getData().getDataSetByIndex(0);
+            set1.setValues(values);
+            set1.notifyDataSetChanged();
+            chart.getData().notifyDataChanged();
+            chart.notifyDataSetChanged();
+        }else {
             // 创建一个数据集并给它一个类型
             set1 = new LineDataSet(values, "血糖值 nA");
             //顶点图标
@@ -276,117 +285,6 @@ public class ChartController extends HomeController {
     private void initGetData() {
         Calendar calendar = Calendar.getInstance();
         curDate = calendar.getTime();
-        // delay（延时）指的是一次执行终止和下一次执行开始之间的延迟
-//        mScheduledExecutorService.scheduleWithFixedDelay(ui_task, 10000, 10000, TimeUnit.MILLISECONDS);
     }
 
-//    Runnable ui_task = new Runnable() {
-//        public void run() {
-//            //获取设备信息
-//            Device device = DbManager.getClient().searchDeviceInfo();
-//            //获取当前日期所有数据
-//            List<NotifyInfo> notifyInfos = DbManager.getClient().searchNotifyInfoByWhere(device.getAddress(), curDate);
-//            List<Entry> entryList = new ArrayList<>();
-//            SimpleDateFormat formatHH = new SimpleDateFormat("HH.mm");
-//            SimpleDateFormat formatSS = new SimpleDateFormat("ss.SSSS");
-//            for (NotifyInfo notifyInfo : notifyInfos
-//            ) {
-//                //获取X值
-//                Float HH = Float.valueOf(formatHH.format(notifyInfo.getTime()));
-//                Float SS = Float.valueOf(formatSS.format(notifyInfo.getTime()));
-//                float xVale = HH + SS / 60;
-//                Entry entry = new Entry(xVale, notifyInfo.getMessage());
-//                entryList.add(entry);
-//            }
-//            chart.post(new Runnable() {
-//                @Override
-//                public void run() {
-//
-//
-//                    LineDataSet set1;
-//
-//                    if (chart.getData() != null &&
-//                            chart.getData().getDataSetCount() > 0) {
-//                        set1 = (LineDataSet) chart.getData().getDataSetByIndex(0);
-//                        set1.setValues(values);
-//                        set1.notifyDataSetChanged();
-//                        chart.getData().notifyDataChanged();
-//                        chart.notifyDataSetChanged();
-//                    } else {
-//                        // create a dataset and give it a type
-//                        set1 = new LineDataSet(values, "DataSet 1");
-//
-//                        set1.setDrawIcons(false);
-//
-//                        // draw dashed line
-//                        set1.enableDashedLine(10f, 5f, 0f);
-//
-//                        // black lines and points
-//                        set1.setColor(Color.BLACK);
-//                        set1.setCircleColor(Color.BLACK);
-//
-//                        // line thickness and point size
-//                        set1.setLineWidth(1f);
-//                        set1.setCircleRadius(3f);
-//
-//                        // draw points as solid circles
-//                        set1.setDrawCircleHole(false);
-//
-//                        // customize legend entry
-//                        set1.setFormLineWidth(1f);
-//                        set1.setFormLineDashEffect(new DashPathEffect(new float[]{10f, 5f}, 0f));
-//                        set1.setFormSize(15.f);
-//
-//                        // text size of values
-//                        set1.setValueTextSize(9f);
-//
-//                        // draw selection line as dashed
-//                        set1.enableDashedHighlightLine(10f, 5f, 0f);
-//
-//                        // set the filled area
-//                        set1.setDrawFilled(true);
-//                        set1.setFillFormatter(new IFillFormatter() {
-//                            @Override
-//                            public float getFillLinePosition(ILineDataSet dataSet, LineDataProvider dataProvider) {
-//                                return chart.getAxisLeft().getAxisMinimum();
-//                            }
-//                        });
-//
-//                        // set color of filled area
-//                        if (Utils.getSDKInt() >= 18) {
-//                            // drawables only supported on api level 18 and above
-//                            Drawable drawable = ContextCompat.getDrawable(this, R.drawable.fade_red);
-//                            set1.setFillDrawable(drawable);
-//                        } else {
-//                            set1.setFillColor(Color.BLACK);
-//                        }
-//
-//                        ArrayList<ILineDataSet> dataSets = new ArrayList<>();
-//                        dataSets.add(set1); // add the data sets
-//
-//                        // create a data object with the data sets
-//                        LineData data = new LineData(dataSets);
-//
-//                        // set data
-//                        chart.setData(data);
-//                    }
-//
-//
-//                    if(entryList.size()>0){
-//                        LineData data = chart.getData();
-//                        // 生成随机测试数
-//                        for (Entry entry : entryList
-//                        ) {
-//                            data.addEntry(entry, 0);
-//                        }
-//                        LineDataSet set1 = (LineDataSet) chart.getData().getDataSetByIndex(0);
-//                        chart.getData().notifyDataChanged();
-//                        chart.notifyDataSetChanged();
-//                        chart.invalidate();
-//                        Log.d("XCM", String.valueOf(entryList.size()));
-//                    }
-//                }
-//            });
-//        }
-//    };
 }
