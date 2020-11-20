@@ -53,7 +53,7 @@ public class StringTool {
         return bytes;
     }
 
-    //获取获取时间字节数组
+    //获取获取电量字节数组
     public  static byte[] getBytesByGetBattery(){
         byte[] bytes = new byte[8];
         bytes[0] = (byte) 0x04;

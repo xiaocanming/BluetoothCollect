@@ -60,7 +60,7 @@ public class AnalysisTool {
             return new MessageEvent(MessageEvent.MsgType.ReceiveBack, msg);
         } else if (msg[0] == 0x03 && msg[7] == 0x07) {
             return new MessageEvent(MessageEvent.MsgType.TimeBack, msg);
-        } else if (msg[0] == 0x05 && msg[3] == 0x00 && msg[4] == 0x00 && msg[5] == 0x00 && msg[6] == 0x00 && msg[7] == 0x00) {
+        } else if (msg[0] == 0x05 && msg.length==3) {
             return new MessageEvent(MessageEvent.MsgType.BatteryBack, msg);
         } else {
             return new MessageEvent(MessageEvent.MsgType.ErrorData, msg);

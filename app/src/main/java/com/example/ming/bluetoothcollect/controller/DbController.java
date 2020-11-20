@@ -135,20 +135,20 @@ public class DbController {
     }
 
 
-//    /**
-//     * 新增通知消息
-//     * @param notifyInfo
-//     */
-//    public void insertNotifyInfo(NotifyInfo notifyInfo){
-//        notifyInfoDao.insert(notifyInfo);
-//    }
-//
-//    /**
-//     * 按条件查询通知消息
-//     */
-//    public List<NotifyInfo> searchNotifyInfoByWhere(String address){
-//        List<NotifyInfo>notifyInfos = (List<NotifyInfo>) notifyInfoDao.queryBuilder().where(NotifyInfoDao.Properties.Address.eq(address)).list();
-//        return notifyInfos;
-//    }
+    /**
+     * 新增通知消息
+     * @param notifyInfoList
+     */
+    public void insertNotifyInfo(List<NotifyInfo> notifyInfoList){
+        notifyInfoDao.insertInTx(notifyInfoList);
+    }
+
+    /**
+     * 按条件查询通知消息
+     */
+    public List<NotifyInfo> searchNotifyInfoByWhere(String address){
+        List<NotifyInfo>notifyInfos = (List<NotifyInfo>) notifyInfoDao.queryBuilder().where(NotifyInfoDao.Properties.Address.eq(address)).list();
+        return notifyInfos;
+    }
 
 }

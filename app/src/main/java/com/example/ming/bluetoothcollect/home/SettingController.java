@@ -139,6 +139,20 @@ public class SettingController extends HomeController {
             }
         }
     };
+    //设备电量
+    private QMUICommonListItemView itemWithDeviceBattery;
+    View.OnClickListener itemWithDeviceBatteryOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (v instanceof QMUICommonListItemView) {
+                if (isUseDevice != null) {
+                    if (isUseDevice.getDatedeviceservice() != null) {
+                        ClientManager.getClient().write(isUseDevice.getAddress(), isUseDevice.getDatedeviceservice().getService(), isUseDevice.getDatedeviceservice().getCharacter(), StringTool.getBytesByGetBattery(), mWriteRsp);
+                    }
+                }
+            }
+        }
+    };
     //设备设置
     //开启采集
     private QMUICommonListItemView itemWithCollectSwitch;
@@ -177,25 +191,25 @@ public class SettingController extends HomeController {
         @Override
         public void onClick(View v) {
             if (v instanceof QMUICommonListItemView) {
-//                if (isUseDevice != null) {
-//                    List<NotifyInfo> newUseDevice = DbManager.getClient().(isUseDevice.getAddress());
-//                    String message = "";
-//                    for (NotifyInfo notifyInfo : newUseDevice) {
-//                        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-////                        message += format.format(notifyInfo.getCreatetime()) + "--" + String.format("%s", ByteUtils.byteToString(notifyInfo.getMessage())) + "\n\n";
-//                    }
-//                    new QMUIDialog.MessageDialogBuilder(getContext())
-//                            .setTitle("监听数据")
-//                            .setSkinManager(QMUISkinManager.defaultInstance(getContext()))
-//                            .setMessage(message)
-//                            .addAction("取消", new QMUIDialogAction.ActionListener() {
-//                                @Override
-//                                public void onClick(QMUIDialog dialog, int index) {
-//                                    dialog.dismiss();
-//                                }
-//                            })
-//                            .create(com.qmuiteam.qmui.R.style.QMUI_Dialog).show();
-//                }
+                if (isUseDevice != null) {
+                    List<NotifyInfo> notifyInfos = DbManager.getClient().searchNotifyInfoByWhere(isUseDevice.getAddress());
+                    String message = "";
+                    for (NotifyInfo notifyInfo : notifyInfos) {
+                        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSSS");
+                        message += format.format(notifyInfo.getTime()) + "--" + String.format("%s", String.valueOf(notifyInfo.getMessage())) + "\n\n";
+                    }
+                    new QMUIDialog.MessageDialogBuilder(getContext())
+                            .setTitle("监听数据")
+                            .setSkinManager(QMUISkinManager.defaultInstance(getContext()))
+                            .setMessage(message)
+                            .addAction("取消", new QMUIDialogAction.ActionListener() {
+                                @Override
+                                public void onClick(QMUIDialog dialog, int index) {
+                                    dialog.dismiss();
+                                }
+                            })
+                            .create(com.qmuiteam.qmui.R.style.QMUI_Dialog).show();
+                }
             }
         }
     };
@@ -242,12 +256,21 @@ public class SettingController extends HomeController {
                 QMUICommonListItemView.HORIZONTAL,
                 QMUICommonListItemView.ACCESSORY_TYPE_NONE);
         itemWithDeviceTime.setDetailText("---------");
+        //设备电量
+        itemWithDeviceBattery = mGroupListView.createItemView(
+                ContextCompat.getDrawable(getContext(), R.mipmap.icon_listitem_battery),
+                "设备电量",
+                null,
+                QMUICommonListItemView.HORIZONTAL,
+                QMUICommonListItemView.ACCESSORY_TYPE_NONE);
+        itemWithDeviceBattery.setDetailText("---------");
 
         QMUIGroupListView.newSection(getContext())
                 .setTitle("设备信息")
                 .setLeftIconSize(size, ViewGroup.LayoutParams.WRAP_CONTENT)
                 .addItemView(itemWithUseDevice, itemWithUseDeviceOnClickListener)
                 .addItemView(itemWithDeviceTime, itemWithDeviceTimeOnClickListener)
+                .addItemView(itemWithDeviceBattery, itemWithDeviceBatteryOnClickListener)
                 .addTo(mGroupListView);
 
         //开启采集
@@ -426,7 +449,7 @@ public class SettingController extends HomeController {
                         if(code == REQUEST_SUCCESS){
                             //注册连接状态监听
                             ClientManager.getClient().registerConnectStatusListener(isUseDevice.getAddress(), mConnectStatusListener);
-                            itemWithCollectSwitch.getSwitch().setChecked(true);
+//                            itemWithCollectSwitch.getSwitch().setChecked(true);
                             //打开消息通知
                             ClientManager.getClient().notify(isUseDevice.getAddress(), isUseDevice.getCollectdeviceservice().getService(), isUseDevice.getCollectdeviceservice().getCharacter(), mNotifyRsp);
                         }
@@ -465,7 +488,6 @@ public class SettingController extends HomeController {
         @Override
         public void onNotify(UUID service, UUID character, byte[] value) {
             if (service.equals(isUseDevice.getCollectdeviceservice().getService()) && character.equals(isUseDevice.getCollectdeviceservice().getCharacter())) {
-                Log.d("XCM",String.format("%s", ByteUtils.byteToString(value)));
                 itemWithDetail.setDetailText("最新读取到的数据：" + String.format("%s", ByteUtils.byteToString(value)));
 //                保存数据到数据库中
                 SettingService.SaveBleNotifyData(threadPoolExecutor,mHandler,isUseDevice.getAddress(), value);
@@ -503,8 +525,13 @@ public class SettingController extends HomeController {
             switch (msg.what) {
                 case 0:
                     //完成主界面更新,拿到数据
-                    String data = (String)msg.obj;
-                    itemWithDeviceTime.setDetailText(data);
+                    String timedata = (String)msg.obj;
+                    itemWithDeviceTime.setDetailText(timedata);
+                    break;
+                case 1:
+                    //完成主界面更新,拿到数据
+                    String batterydata = (String)msg.obj;
+                    itemWithDeviceBattery.setDetailText(batterydata);
                     break;
                 default:
                     break;
