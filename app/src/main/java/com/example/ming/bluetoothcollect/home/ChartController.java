@@ -113,6 +113,9 @@ public class ChartController extends HomeController {
             @Override
             public void onTimeSelect(Date date, View v) {//选中事件回调
                 curDate = date;
+                SimpleDateFormat formatter = new SimpleDateFormat("MM-dd");
+                String dateString = formatter.format(curDate);
+                mTopBar.setTitle("血糖值记录"+"("+dateString+")");
                 setData();
                 chart.invalidate();
             }
@@ -210,17 +213,19 @@ public class ChartController extends HomeController {
     private void setData() {
         ArrayList<Entry> values = new ArrayList<>();
         Device device = DbManager.getClient().searchDeviceInfo();
-        List<NotifyInfo> notifyInfos = DbManager.getClient().searchNotifyInfoByWhere(device.getAddress(), curDate);
-        SimpleDateFormat formatHH = new SimpleDateFormat("HH.mm");
-        SimpleDateFormat formatSS = new SimpleDateFormat("ss.SSSS");
-        for (NotifyInfo notifyInfo : notifyInfos
-        ) {
-            //获取X值
-            Float HH = Float.valueOf(formatHH.format(notifyInfo.getTime()));
-            Float SS = Float.valueOf(formatSS.format(notifyInfo.getTime()));
-            float xVale = HH + SS / 60;
-            Entry entry = new Entry(xVale, notifyInfo.getMessage());
-            values.add(entry);
+        if(device!=null){
+            List<NotifyInfo> notifyInfos = DbManager.getClient().searchNotifyInfoByWhere(device.getAddress(), curDate);
+            SimpleDateFormat formatHH = new SimpleDateFormat("HH.mm");
+            SimpleDateFormat formatSS = new SimpleDateFormat("ss.SSSS");
+            for (NotifyInfo notifyInfo : notifyInfos
+            ) {
+                //获取X值
+                Float HH = Float.valueOf(formatHH.format(notifyInfo.getTime()));
+                Float SS = Float.valueOf(formatSS.format(notifyInfo.getTime()));
+                float xVale = HH + SS / 60;
+                Entry entry = new Entry(xVale, notifyInfo.getMessage());
+                values.add(entry);
+            }
         }
         values.add(new Entry(0,0));
         LineDataSet set1;
@@ -285,6 +290,9 @@ public class ChartController extends HomeController {
     private void initGetData() {
         Calendar calendar = Calendar.getInstance();
         curDate = calendar.getTime();
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        String dateString = formatter.format(curDate);
+        mTopBar.setTitle("血糖值记录"+"("+dateString+")");
     }
 
 }

@@ -154,16 +154,6 @@ public class SettingController extends HomeController {
         }
     };
     //设备设置
-    //开启采集
-    private QMUICommonListItemView itemWithCollectSwitch;
-    View.OnClickListener itemWithCollectSwitcheOnClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            if (v instanceof QMUICommonListItemView) {
-                ((QMUICommonListItemView) v).getSwitch().toggle();
-            }
-        }
-    };
     //采集周期
     private QMUICommonListItemView itemWithCollectCycle;
     View.OnClickListener itemWithCollectCycleOnClickListener = new View.OnClickListener() {
@@ -192,23 +182,24 @@ public class SettingController extends HomeController {
         public void onClick(View v) {
             if (v instanceof QMUICommonListItemView) {
                 if (isUseDevice != null) {
-//                    List<NotifyInfo> notifyInfos = DbManager.getClient().searchNotifyInfoByWhere(isUseDevice.getAddress(),);
-//                    String message = "";
-//                    for (NotifyInfo notifyInfo : notifyInfos) {
-//                        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSSS");
-//                        message += format.format(notifyInfo.getTime()) + "--" + String.format("%s", String.valueOf(notifyInfo.getMessage())) + "\n\n";
-//                    }
-//                    new QMUIDialog.MessageDialogBuilder(getContext())
-//                            .setTitle("监听数据")
-//                            .setSkinManager(QMUISkinManager.defaultInstance(getContext()))
-//                            .setMessage(message)
-//                            .addAction("取消", new QMUIDialogAction.ActionListener() {
-//                                @Override
-//                                public void onClick(QMUIDialog dialog, int index) {
-//                                    dialog.dismiss();
-//                                }
-//                            })
-//                            .create(com.qmuiteam.qmui.R.style.QMUI_Dialog).show();
+                    Calendar calendar = Calendar.getInstance();
+                    List<NotifyInfo> notifyInfos = DbManager.getClient().searchNotifyInfoByWhere(isUseDevice.getAddress(),calendar.getTime());
+                    String message = "";
+                    for (NotifyInfo notifyInfo : notifyInfos) {
+                        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSSS");
+                        message += format.format(notifyInfo.getTime()) + "--" + String.format("%s", String.valueOf(notifyInfo.getMessage())) + "\n\n";
+                    }
+                    new QMUIDialog.MessageDialogBuilder(getContext())
+                            .setTitle("监听数据")
+                            .setSkinManager(QMUISkinManager.defaultInstance(getContext()))
+                            .setMessage(message)
+                            .addAction("取消", new QMUIDialogAction.ActionListener() {
+                                @Override
+                                public void onClick(QMUIDialog dialog, int index) {
+                                    dialog.dismiss();
+                                }
+                            })
+                            .create(com.qmuiteam.qmui.R.style.QMUI_Dialog).show();
                 }
             }
         }
@@ -273,23 +264,6 @@ public class SettingController extends HomeController {
                 .addItemView(itemWithDeviceBattery, itemWithDeviceBatteryOnClickListener)
                 .addTo(mGroupListView);
 
-        //开启采集
-        itemWithCollectSwitch = mGroupListView.createItemView("血糖仪数据获取开关");
-        itemWithCollectSwitch.setAccessoryType(QMUICommonListItemView.ACCESSORY_TYPE_SWITCH);
-        itemWithCollectSwitch.getSwitch().setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isUseDevice != null&&isUseDevice.getCollectdeviceservice() != null) {
-                    if (isChecked) {
-                        ClientManager.getClient().notify(isUseDevice.getAddress(), isUseDevice.getCollectdeviceservice().getService(), isUseDevice.getCollectdeviceservice().getCharacter(), mNotifyRsp);
-                    } else {
-                        ClientManager.getClient().unnotify(isUseDevice.getAddress(), isUseDevice.getCollectdeviceservice().getService(), isUseDevice.getCollectdeviceservice().getCharacter(), mUnnotifyRsp);
-                    }
-                }else {
-                    itemWithCollectSwitch.getSwitch().toggle();
-                }
-            }
-        });
         //采集周期
         itemWithCollectCycle = mGroupListView.createItemView(
                 ContextCompat.getDrawable(getContext(), R.mipmap.icon_listitem_cycle),
@@ -302,7 +276,6 @@ public class SettingController extends HomeController {
         QMUIGroupListView.newSection(getContext())
                 .setTitle("监听设置")
                 .setLeftIconSize(size, ViewGroup.LayoutParams.WRAP_CONTENT)
-                .addItemView(itemWithCollectSwitch, itemWithCollectSwitcheOnClickListener)
                 .addItemView(itemWithCollectCycle, itemWithCollectCycleOnClickListener)
                 .addTo(mGroupListView);
 
@@ -449,7 +422,6 @@ public class SettingController extends HomeController {
                         if(code == REQUEST_SUCCESS){
                             //注册连接状态监听
                             ClientManager.getClient().registerConnectStatusListener(isUseDevice.getAddress(), mConnectStatusListener);
-//                            itemWithCollectSwitch.getSwitch().setChecked(true);
                             //打开消息通知
                             ClientManager.getClient().notify(isUseDevice.getAddress(), isUseDevice.getCollectdeviceservice().getService(), isUseDevice.getCollectdeviceservice().getCharacter(), mNotifyRsp);
                         }
@@ -465,7 +437,6 @@ public class SettingController extends HomeController {
            if(mac.equals(isUseDevice.getAddress())&&status==STATUS_DISCONNECTED){
                ClientManager.getClient().unregisterConnectStatusListener(isUseDevice.getAddress(), mConnectStatusListener);
                ClientManager.getClient().unnotify(isUseDevice.getAddress(), isUseDevice.getCollectdeviceservice().getService(), isUseDevice.getCollectdeviceservice().getCharacter(), mUnnotifyRsp);
-               itemWithCollectSwitch.getSwitch().setChecked(false);
                itemWithUseDevice.setDetailText("未连接");
            }
             if(mac.equals(isUseDevice.getAddress())&&status==STATUS_CONNECTED){
@@ -499,12 +470,10 @@ public class SettingController extends HomeController {
             if (code == REQUEST_SUCCESS) {
                 TipsTool.showtipDialog(getContext(), "打开监听成功", QMUITipDialog.Builder.ICON_TYPE_SUCCESS);
             } else {
-                itemWithCollectSwitch.getSwitch().toggle();
                 TipsTool.showtipDialog(getContext(), "打开监听失败", QMUITipDialog.Builder.ICON_TYPE_SUCCESS);
             }
         }
     };
-
     private final BleUnnotifyResponse mUnnotifyRsp = new BleUnnotifyResponse() {
         @Override
         public void onResponse(int code) {
@@ -548,7 +517,7 @@ public class SettingController extends HomeController {
     //重新加载页面
     @Override
     protected void dispatchRestoreInstanceState(SparseArray<Parcelable> container) {
-        connectDeviceIfNeeded();
+        intBuletoothDevice();
         super.dispatchRestoreInstanceState(container);
     }
 

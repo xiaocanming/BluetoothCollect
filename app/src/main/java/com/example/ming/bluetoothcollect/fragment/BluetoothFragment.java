@@ -103,7 +103,7 @@ public class BluetoothFragment extends BaseFragment {
                 final SearchResult item = (SearchResult) mAdapter.getItem(pos);
                 new QMUIDialog.MessageDialogBuilder(getContext())
                         .setTitle("连接蓝牙")
-                        .setMessage("确定连接该设备["+item.getName()+"]吗？")
+                        .setMessage("确定连接该设备[" + item.getName() + "]吗？")
                         .addAction("取消", new QMUIDialogAction.ActionListener() {
                             @Override
                             public void onClick(QMUIDialog dialog, int index) {
@@ -117,7 +117,7 @@ public class BluetoothFragment extends BaseFragment {
                                 final QMUITipDialog tipDialog;
                                 tipDialog = new QMUITipDialog.Builder(getContext())
                                         .setIconType(QMUITipDialog.Builder.ICON_TYPE_LOADING)
-                                        .setTipWord("连接中" )
+                                        .setTipWord("连接中")
                                         .create();
                                 tipDialog.show();
                                 ClientManager.getClient().connect(item.getAddress(), BluetoothTool.getBleConnectOptions(), new BleConnectResponse() {
@@ -129,19 +129,18 @@ public class BluetoothFragment extends BaseFragment {
                                             List<DeviceDetailInfo> items = new ArrayList<DeviceDetailInfo>();
                                             List<BleGattService> services = profile.getServices();
                                             for (BleGattService service : services) {
-                                                items.add(new DeviceDetailInfo(null, item.getAddress(),0,service.getUUID().toString(), ""));
+                                                items.add(new DeviceDetailInfo(null, item.getAddress(), 0, service.getUUID().toString(), ""));
                                                 List<BleGattCharacter> characters = service.getCharacters();
                                                 for (BleGattCharacter character : characters) {
-                                                    items.add(new DeviceDetailInfo(null, item.getAddress(),1,service.getUUID().toString(), character.getUuid().toString()));
+                                                    items.add(new DeviceDetailInfo(null, item.getAddress(), 1, service.getUUID().toString(), character.getUuid().toString()));
                                                 }
                                             }
                                             //添加
-                                            DeviceInfo deviceInfo = new DeviceInfo(null,item.getAddress(),item.getName(),0,0);
-                                            DbManager.getClient().insertDeviceInfo(deviceInfo,items);
+                                            DeviceInfo deviceInfo = new DeviceInfo(null, item.getAddress(), item.getName(), 0, 0);
+                                            DbManager.getClient().insertDeviceInfo(deviceInfo, items);
                                             popBackStack();
-                                        }
-                                        else {
-                                            TipsTool.showtipDialog(getContext(), "连接失败",QMUITipDialog.Builder.ICON_TYPE_FAIL);
+                                        } else {
+                                            TipsTool.showtipDialog(getContext(), "连接失败", QMUITipDialog.Builder.ICON_TYPE_FAIL);
                                         }
                                     }
                                 });
@@ -159,10 +158,12 @@ public class BluetoothFragment extends BaseFragment {
             public void onMoveTarget(int offset) {
 
             }
+
             @Override
             public void onMoveRefreshView(int offset) {
 
             }
+
             @Override
             public void onRefresh() {
                 searchDevice();
