@@ -168,18 +168,13 @@ public class  HomeFragment extends BaseFragment {
         return null;
     }
 
-    //断开蓝牙连接
     @Override
     public void onPause() {
         super.onPause();
-        ClientManager.getClient().stopSearch();
     }
 
-    //断开蓝牙连接
     @Override
     public void onDestroy() {
-        Device newUseDevice= DbManager.getClient().searchDeviceInfo();
-        ClientManager.getClient().disconnect(newUseDevice.getAddress());
         super.onDestroy();
     }
 }

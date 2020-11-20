@@ -48,4 +48,6 @@
     <color name="main_background">#EEEEEE</color>
     <color name="qmui_config_color_white">#ffffff</color>
     <color name="qmui_config_color_gray_7">#ADB4BE</color>
+
+    <color name="black">#4B4B4B</color>
 </resources>

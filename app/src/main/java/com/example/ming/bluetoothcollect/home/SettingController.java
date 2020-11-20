@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Handler;
+import android.os.Message;
 import android.os.Parcelable;
 import android.util.Log;
 import android.util.SparseArray;
@@ -20,6 +21,7 @@ import com.example.ming.bluetoothcollect.R;
 import com.example.ming.bluetoothcollect.base.MainApplication;
 import com.example.ming.bluetoothcollect.controller.ClientManager;
 import com.example.ming.bluetoothcollect.controller.DbManager;
+import com.example.ming.bluetoothcollect.custom.BerNpickerView;
 import com.example.ming.bluetoothcollect.fragment.BluetoothFragment;
 import com.example.ming.bluetoothcollect.model.Device;
 import com.example.ming.bluetoothcollect.model.DeviceDetailInfo;
@@ -60,12 +62,16 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import static com.inuker.bluetooth.library.Constants.REQUEST_SUCCESS;
 import static com.inuker.bluetooth.library.Constants.STATUS_CONNECTED;
+import static com.inuker.bluetooth.library.Constants.STATUS_DISCONNECTED;
 
 public class SettingController extends HomeController {
     @BindView(R.id.topbar)
@@ -75,13 +81,12 @@ public class SettingController extends HomeController {
     //正在使用设备信息
     private Device isUseDevice;
     //采集周期选择器
-    private OptionsPickerView pvCollectOptions;
-    private ArrayList<ProvinceBean> options1ItemsCollect = new ArrayList<>();
-    private ArrayList<ArrayList<Integer>> options2ItemsCollect = new ArrayList<>();
-    //日志周期选择器
+    private BerNpickerView pvCollectOptions;
+    //日志保存周期选择器
     private OptionsPickerView pvLogOptions;
-    private ArrayList<ProvinceBean> options1ItemsLog = new ArrayList<>();
-    private ArrayList<ArrayList<Integer>> options2ItemsLog = new ArrayList<>();
+    //创建基本线程池
+    final ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(3,5,1, TimeUnit.SECONDS,
+            new LinkedBlockingQueue<Runnable>(50));
     //设备信息
     //使用设备
     private QMUICommonListItemView itemWithUseDevice;
@@ -134,8 +139,6 @@ public class SettingController extends HomeController {
             }
         }
     };
-
-
     //设备设置
     //开启采集
     private QMUICommonListItemView itemWithCollectSwitch;
@@ -157,7 +160,6 @@ public class SettingController extends HomeController {
             }
         }
     };
-
     //日志设置
     //数据保存周期
     private QMUICommonListItemView itemWithLogCycle;
@@ -175,46 +177,38 @@ public class SettingController extends HomeController {
         @Override
         public void onClick(View v) {
             if (v instanceof QMUICommonListItemView) {
-                if (isUseDevice != null) {
-                    List<NotifyInfo> newUseDevice = DbManager.getClient().searchNotifyInfoByWhere(isUseDevice.getAddress());
-                    String message = "";
-                    for (NotifyInfo notifyInfo : newUseDevice) {
-                        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//                        message += format.format(notifyInfo.getCreatetime()) + "--" + String.format("%s", ByteUtils.byteToString(notifyInfo.getMessage())) + "\n\n";
-                    }
-                    new QMUIDialog.MessageDialogBuilder(getContext())
-                            .setTitle("监听数据")
-                            .setSkinManager(QMUISkinManager.defaultInstance(getContext()))
-                            .setMessage(message)
-                            .addAction("取消", new QMUIDialogAction.ActionListener() {
-                                @Override
-                                public void onClick(QMUIDialog dialog, int index) {
-                                    dialog.dismiss();
-                                }
-                            })
-                            .create(com.qmuiteam.qmui.R.style.QMUI_Dialog).show();
-                }
-
+//                if (isUseDevice != null) {
+//                    List<NotifyInfo> newUseDevice = DbManager.getClient().(isUseDevice.getAddress());
+//                    String message = "";
+//                    for (NotifyInfo notifyInfo : newUseDevice) {
+//                        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+////                        message += format.format(notifyInfo.getCreatetime()) + "--" + String.format("%s", ByteUtils.byteToString(notifyInfo.getMessage())) + "\n\n";
+//                    }
+//                    new QMUIDialog.MessageDialogBuilder(getContext())
+//                            .setTitle("监听数据")
+//                            .setSkinManager(QMUISkinManager.defaultInstance(getContext()))
+//                            .setMessage(message)
+//                            .addAction("取消", new QMUIDialogAction.ActionListener() {
+//                                @Override
+//                                public void onClick(QMUIDialog dialog, int index) {
+//                                    dialog.dismiss();
+//                                }
+//                            })
+//                            .create(com.qmuiteam.qmui.R.style.QMUI_Dialog).show();
+//                }
             }
         }
     };
-
-
-
-
 
     public SettingController(Context context) {
         super(context);
         LayoutInflater.from(context).inflate(R.layout.fragment_home1, this);
         ButterKnife.bind(this);
         initTopBar();
-        initGroupListView();
-        connectedBuletoothDevice();
-        getOptionData();
         initOptionPicker();
+        initGroupListView();
+        intBuletoothDevice();
     }
-
-
 
     private void initTopBar() {
         mTopBar.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.app_color_theme_6));
@@ -229,10 +223,6 @@ public class SettingController extends HomeController {
             }
         });
     }
-
-
-
-
 
     private void initGroupListView() {
         int size = QMUIDisplayHelper.dp2px(getContext(), 20);
@@ -266,14 +256,14 @@ public class SettingController extends HomeController {
         itemWithCollectSwitch.getSwitch().setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isUseDevice != null) {
-                    if (isUseDevice.getCollectdeviceservice() != null) {
-                        if (isChecked) {
-                            ClientManager.getClient().notify(isUseDevice.getAddress(), isUseDevice.getCollectdeviceservice().getService(), isUseDevice.getCollectdeviceservice().getCharacter(), mNotifyRsp);
-                        } else {
-                            ClientManager.getClient().unnotify(isUseDevice.getAddress(), isUseDevice.getCollectdeviceservice().getService(), isUseDevice.getCollectdeviceservice().getCharacter(), mUnnotifyRsp);
-                        }
+                if (isUseDevice != null&&isUseDevice.getCollectdeviceservice() != null) {
+                    if (isChecked) {
+                        ClientManager.getClient().notify(isUseDevice.getAddress(), isUseDevice.getCollectdeviceservice().getService(), isUseDevice.getCollectdeviceservice().getCharacter(), mNotifyRsp);
+                    } else {
+                        ClientManager.getClient().unnotify(isUseDevice.getAddress(), isUseDevice.getCollectdeviceservice().getService(), isUseDevice.getCollectdeviceservice().getCharacter(), mUnnotifyRsp);
                     }
+                }else {
+                    itemWithCollectSwitch.getSwitch().toggle();
                 }
             }
         });
@@ -284,7 +274,7 @@ public class SettingController extends HomeController {
                 null,
                 QMUICommonListItemView.HORIZONTAL,
                 QMUICommonListItemView.ACCESSORY_TYPE_NONE);
-        itemWithCollectCycle.setDetailText("15 分钟");
+        itemWithCollectCycle.setDetailText("---------");
 
         QMUIGroupListView.newSection(getContext())
                 .setTitle("监听设置")
@@ -301,7 +291,7 @@ public class SettingController extends HomeController {
                 null,
                 QMUICommonListItemView.HORIZONTAL,
                 QMUICommonListItemView.ACCESSORY_TYPE_NONE);
-        itemWithLogCycle.setDetailText("14天");
+        itemWithLogCycle.setDetailText("---------");
         int height = QMUIResHelper.getAttrDimen(getContext(), com.qmuiteam.qmui.R.attr.qmui_list_item_height);
         itemWithDetail = mGroupListView.createItemView(
                 ContextCompat.getDrawable(getContext(), R.mipmap.icon_listitem_file),
@@ -319,31 +309,67 @@ public class SettingController extends HomeController {
     }
 
 
-
+    /**
+     * 初始化选择弹窗
+     */
     private void initOptionPicker() {//周期选择器
-
         /**
          * 采集周期选择器
          */
-        pvCollectOptions = new OptionsPickerView.Builder(getContext(), new OptionsPickerView.OnOptionsSelectListener() {
+        pvCollectOptions = new BerNpickerView.Builder(getContext(), new BerNpickerView.OnOptionsSelectListener() {
             @Override
-            public void onOptionsSelect(int options1, int options2, int options3, View v) {
-                //返回的分别是三个级别的选中位置
-                int tx = options1ItemsCollect.get(options1).getUnitnum()
-                        * options2ItemsCollect.get(options1).get(options2);
-                itemWithCollectCycle.setDetailText(String.valueOf(tx) + " 分钟");
+            public void onOptionsSelect(List datalist, View v) {
+                List<Integer> timeList = StringTool.getTimeLag(datalist.get(0).toString(),datalist.get(1).toString(),datalist.get(2).toString(),datalist.get(3).toString());
+                ClientManager.getClient().write(isUseDevice.getAddress(), isUseDevice.getDatedeviceservice().getService(), isUseDevice.getDatedeviceservice().getCharacter(), StringTool.getBytesBySetInterval(timeList.get(0),timeList.get(1)), mWriteRsp);
             }
         })
-                .setTitleText("周期选择")
-                .setContentTextSize(20)//设置滚轮文字大小
-                .setDividerColor(Color.DKGRAY)//设置分割线的颜色
-                .setSelectOptions(0, 1)//默认选中项
-                .isCenterLabel(false) //是否只显示中间选中项的label文字，false则每项item全部都带有label。
+                .setTotal(4)
+                .setTitleText("早间隔-晚间隔")
                 .build();
-        pvCollectOptions.setPicker(options1ItemsCollect, options2ItemsCollect);//二级选择器
+        List<String> hH = new ArrayList<>();
+        List<String> sS = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            String hour = String.valueOf(i);
+            /*判断如果为个位数则在前面拼接‘0’*/
+            if (hour.length() < 2) {
+                hour = "0" + hour;
+            }
+            hH.add(hour);
+        }
+        for (int i = 0; i < 60; i++) {
+            String minute = String.valueOf(i);
+            /*判断如果为个位数则在前面拼接‘0’*/
+            if (minute.length() < 2) {
+                minute = "0" + minute;
+            }
+            sS.add(minute);
+        }
+        List<List<String>> timelist = new ArrayList<>();
+        timelist.add(hH);
+        timelist.add(sS);
+        timelist.add(hH);
+        timelist.add(sS);
+        pvCollectOptions.setNPicker(timelist);
+
         /**
          * 日志周期选择器
          */
+         ArrayList<ProvinceBean> options1ItemsLog = new ArrayList<>();
+         ArrayList<ArrayList<Integer>> options2ItemsLog = new ArrayList<>();
+        //日志周期
+        options1ItemsLog.add(new ProvinceBean(0, "天", 1));
+        options1ItemsLog.add(new ProvinceBean(1, "周", 7));
+        //采集周期选择
+        ArrayList<Integer> options2ItemsLog_01 = new ArrayList<>();
+        for (int i = 1; i <= 30; i++) {
+            options2ItemsLog_01.add(i);
+        }
+        ArrayList<Integer> options2ItemsLog_02 = new ArrayList<>();
+        for (int i = 1; i <= 4; i++) {
+            options2ItemsLog_02.add(i);
+        }
+        options2ItemsLog.add(options2ItemsLog_01);
+        options2ItemsLog.add(options2ItemsLog_02);
         pvLogOptions = new OptionsPickerView.Builder(getContext(), new OptionsPickerView.OnOptionsSelectListener() {
             @Override
             public void onOptionsSelect(int options1, int options2, int options3, View v) {
@@ -363,7 +389,7 @@ public class SettingController extends HomeController {
     }
 
 
-    private void connectedBuletoothDevice() {
+    private void intBuletoothDevice() {
         //获取正在使用蓝牙
         Device newUseDevice = DbManager.getClient().searchDeviceInfo();
         if (newUseDevice == null) {
@@ -371,42 +397,57 @@ public class SettingController extends HomeController {
         } else {
             //判断是否更换蓝牙
             if (isUseDevice == null) {
-                ClientManager.getClient().registerConnectStatusListener(newUseDevice.getAddress(), mConnectStatusListener);
                 isUseDevice = newUseDevice;
                 connectDeviceIfNeeded();
             } else if (!isUseDevice.getAddress().equals(newUseDevice.getAddress())) {
                 ClientManager.getClient().unregisterConnectStatusListener(isUseDevice.getAddress(), mConnectStatusListener);
-                ClientManager.getClient().registerConnectStatusListener(newUseDevice.getAddress(), mConnectStatusListener);
+                ClientManager.getClient().unnotify(isUseDevice.getAddress(), isUseDevice.getCollectdeviceservice().getService(), isUseDevice.getCollectdeviceservice().getCharacter(), mUnnotifyRsp);
                 isUseDevice = newUseDevice;
-                isUseDevice.setConnectestate(false);
                 connectDeviceIfNeeded();
             }
         }
     }
 
     private void connectDeviceIfNeeded() {
-        if (!isUseDevice.isConnectestate()) {
-            itemWithUseDevice.setAccessoryType(QMUICommonListItemView.ACCESSORY_TYPE_CUSTOM);
-            QMUILoadingView loadingView1 = new QMUILoadingView(getContext());
-            itemWithUseDevice.addAccessoryCustomView(loadingView1);
-            itemWithUseDevice.setDetailText("连接中");
-            itemWithUseDevice.setText(isUseDevice.getName());
-            ClientManager.getClient().connect(isUseDevice.getAddress(), BluetoothTool.getBleConnectOptions(), new BleConnectResponse() {
-                @Override
-                public void onResponse(int code, BleGattProfile profile) {
-                    itemWithUseDevice.setAccessoryType(QMUICommonListItemView.ACCESSORY_TYPE_NONE);
-                    itemWithUseDevice.setDetailText(code == REQUEST_SUCCESS ? "已连接" : "未连接");
-                }
-            });
+        //判断连接状态
+        if(isUseDevice!=null){
+            if(ClientManager.getClient().getConnectStatus(isUseDevice.getAddress())!=STATUS_CONNECTED){
+                //连接蓝牙
+                itemWithUseDevice.setAccessoryType(QMUICommonListItemView.ACCESSORY_TYPE_CUSTOM);
+                QMUILoadingView loadingView1 = new QMUILoadingView(getContext());
+                itemWithUseDevice.addAccessoryCustomView(loadingView1);
+                itemWithUseDevice.setDetailText("连接中");
+                itemWithUseDevice.setText(isUseDevice.getName());
+                ClientManager.getClient().connect(isUseDevice.getAddress(), BluetoothTool.getBleConnectOptions(), new BleConnectResponse() {
+                    @Override
+                    public void onResponse(int code, BleGattProfile profile) {
+                        itemWithUseDevice.setAccessoryType(QMUICommonListItemView.ACCESSORY_TYPE_NONE);
+                        itemWithUseDevice.setDetailText(code == REQUEST_SUCCESS ? "已连接" : "未连接");
+                        if(code == REQUEST_SUCCESS){
+                            //注册连接状态监听
+                            ClientManager.getClient().registerConnectStatusListener(isUseDevice.getAddress(), mConnectStatusListener);
+                            itemWithCollectSwitch.getSwitch().setChecked(true);
+                            //打开消息通知
+                            ClientManager.getClient().notify(isUseDevice.getAddress(), isUseDevice.getCollectdeviceservice().getService(), isUseDevice.getCollectdeviceservice().getCharacter(), mNotifyRsp);
+                        }
+                    }
+                });
+            }
         }
     }
-
     //蓝牙回调方法
     private final BleConnectStatusListener mConnectStatusListener = new BleConnectStatusListener() {
         @Override
         public void onConnectStatusChanged(String mac, int status) {
-            isUseDevice.setConnectestate((status == STATUS_CONNECTED));
-            connectDeviceIfNeeded();
+           if(mac.equals(isUseDevice.getAddress())&&status==STATUS_DISCONNECTED){
+               ClientManager.getClient().unregisterConnectStatusListener(isUseDevice.getAddress(), mConnectStatusListener);
+               ClientManager.getClient().unnotify(isUseDevice.getAddress(), isUseDevice.getCollectdeviceservice().getService(), isUseDevice.getCollectdeviceservice().getCharacter(), mUnnotifyRsp);
+               itemWithCollectSwitch.getSwitch().setChecked(false);
+               itemWithUseDevice.setDetailText("未连接");
+           }
+            if(mac.equals(isUseDevice.getAddress())&&status==STATUS_CONNECTED){
+                connectDeviceIfNeeded();
+            }
         }
     };
     private final BleWriteResponse mWriteRsp = new BleWriteResponse() {
@@ -426,8 +467,8 @@ public class SettingController extends HomeController {
             if (service.equals(isUseDevice.getCollectdeviceservice().getService()) && character.equals(isUseDevice.getCollectdeviceservice().getCharacter())) {
                 Log.d("XCM",String.format("%s", ByteUtils.byteToString(value)));
                 itemWithDetail.setDetailText("最新读取到的数据：" + String.format("%s", ByteUtils.byteToString(value)));
-                //保存数据到数据库中
-//                SettingService.SaveBleNotifyData(isUseDevice.getAddress(), value);
+//                保存数据到数据库中
+                SettingService.SaveBleNotifyData(threadPoolExecutor,mHandler,isUseDevice.getAddress(), value);
             }
         }
 
@@ -436,6 +477,7 @@ public class SettingController extends HomeController {
             if (code == REQUEST_SUCCESS) {
                 TipsTool.showtipDialog(getContext(), "打开监听成功", QMUITipDialog.Builder.ICON_TYPE_SUCCESS);
             } else {
+                itemWithCollectSwitch.getSwitch().toggle();
                 TipsTool.showtipDialog(getContext(), "打开监听失败", QMUITipDialog.Builder.ICON_TYPE_SUCCESS);
             }
         }
@@ -452,37 +494,23 @@ public class SettingController extends HomeController {
         }
     };
 
-    private void getOptionData() {
+    //子线程通知
+    Handler mHandler = new Handler() {
 
-        //采集周期
-        options1ItemsCollect.add(new ProvinceBean(0, "分钟", 1));
-        options1ItemsCollect.add(new ProvinceBean(1, "小时", 60));
-        ArrayList<Integer> options2ItemsCollect_01 = new ArrayList<>();
-        for (int i = 1; i <= 60; i++) {
-            options2ItemsCollect_01.add(i);
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what) {
+                case 0:
+                    //完成主界面更新,拿到数据
+                    String data = (String)msg.obj;
+                    itemWithDeviceTime.setDetailText(data);
+                    break;
+                default:
+                    break;
+            }
         }
-        ArrayList<Integer> options2ItemsCollect_02 = new ArrayList<>();
-        for (int i = 1; i <= 2; i++) {
-            options2ItemsCollect_02.add(i);
-        }
-        options2ItemsCollect.add(options2ItemsCollect_01);
-        options2ItemsCollect.add(options2ItemsCollect_02);
-
-        //日志周期
-        options1ItemsLog.add(new ProvinceBean(0, "天", 1));
-        options1ItemsLog.add(new ProvinceBean(1, "周", 7));
-        //采集周期选择
-        ArrayList<Integer> options2ItemsLog_01 = new ArrayList<>();
-        for (int i = 1; i <= 30; i++) {
-            options2ItemsLog_01.add(i);
-        }
-        ArrayList<Integer> options2ItemsLog_02 = new ArrayList<>();
-        for (int i = 1; i <= 4; i++) {
-            options2ItemsLog_02.add(i);
-        }
-        options2ItemsLog.add(options2ItemsLog_01);
-        options2ItemsLog.add(options2ItemsLog_02);
-    }
+    };
 
     //退出界面保存数据
     @Override
@@ -493,7 +521,7 @@ public class SettingController extends HomeController {
     //重新加载页面
     @Override
     protected void dispatchRestoreInstanceState(SparseArray<Parcelable> container) {
-        connectedBuletoothDevice();
+        connectDeviceIfNeeded();
         super.dispatchRestoreInstanceState(container);
     }
 

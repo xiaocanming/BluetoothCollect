@@ -136,7 +136,7 @@ public class BluetoothFragment extends BaseFragment {
                                                 }
                                             }
                                             //添加
-                                            DeviceInfo deviceInfo = new DeviceInfo(null,item.getAddress(),item.getName(),null,null);
+                                            DeviceInfo deviceInfo = new DeviceInfo(null,item.getAddress(),item.getName(),0,0);
                                             DbManager.getClient().insertDeviceInfo(deviceInfo,items);
                                             popBackStack();
                                         }

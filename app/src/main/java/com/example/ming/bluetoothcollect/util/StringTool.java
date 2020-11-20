@@ -1,8 +1,10 @@
 package com.example.ming.bluetoothcollect.util;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 public class StringTool {
 
@@ -58,7 +60,7 @@ public class StringTool {
         return bytes;
     }
 
-    //获取获取时间字节数组
+    //获取设置时间间隔数组
     public  static byte[] getBytesBySetInterval(int dayinterval, int negihtinterval){
         byte[] bytes = new byte[20];
         bytes[6] = (byte) dayinterval;
@@ -105,6 +107,19 @@ public class StringTool {
         }else {
             return str;
         }
+    }
+
+    //获取早间隔和晚间歌
+    public static List<Integer> getTimeLag(String dayHh, String daySs, String negihtHh, String negihtSs){
+        //校验参数
+        int dayh = Integer.parseInt(dayHh);
+        int days = Integer.parseInt(daySs);
+        int negihth = Integer.parseInt(negihtHh);
+        int negihts = Integer.parseInt(negihtSs);
+        ArrayList<Integer> list = new ArrayList<Integer>();//创建集合存储所有时间点
+        list.add(dayh*60+days);
+        list.add(negihth*60+negihts);
+        return list;
     }
 
     /**

@@ -20,19 +20,18 @@ public class DeviceInfo {
 
     private String name;//设备名称
 
-    @Convert(converter = StringDateConverter.class, columnType = String.class)
-    private Date time; //设备时间
+    private int dayinterval;//早间隔
 
-    private Double battery;//电量
+    private int negihtinterval;//晚间隔
 
-    @Generated(hash = 1940866757)
-    public DeviceInfo(Long id, String address, String name, Date time,
-            Double battery) {
+    @Generated(hash = 1960340631)
+    public DeviceInfo(Long id, String address, String name, int dayinterval,
+            int negihtinterval) {
         this.id = id;
         this.address = address;
         this.name = name;
-        this.time = time;
-        this.battery = battery;
+        this.dayinterval = dayinterval;
+        this.negihtinterval = negihtinterval;
     }
 
     @Generated(hash = 2125166935)
@@ -63,20 +62,20 @@ public class DeviceInfo {
         this.name = name;
     }
 
-    public Date getTime() {
-        return this.time;
+    public int getDayinterval() {
+        return this.dayinterval;
     }
 
-    public void setTime(Date time) {
-        this.time = time;
+    public void setDayinterval(int dayinterval) {
+        this.dayinterval = dayinterval;
     }
 
-    public Double getBattery() {
-        return this.battery;
+    public int getNegihtinterval() {
+        return this.negihtinterval;
     }
 
-    public void setBattery(Double battery) {
-        this.battery = battery;
+    public void setNegihtinterval(int negihtinterval) {
+        this.negihtinterval = negihtinterval;
     }
 
 }

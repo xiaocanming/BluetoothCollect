@@ -1,8 +1,14 @@
 package com.example.ming.bluetoothcollect.service;
 
+import android.os.Handler;
+import android.os.Message;
+
+import com.example.ming.bluetoothcollect.MainActivity;
 import com.example.ming.bluetoothcollect.controller.AnalysisManager;
 import com.example.ming.bluetoothcollect.controller.DbController;
 import com.example.ming.bluetoothcollect.controller.DbManager;
+import com.example.ming.bluetoothcollect.home.HomeFragment;
+import com.example.ming.bluetoothcollect.home.SettingController;
 import com.example.ming.bluetoothcollect.model.Device;
 import com.example.ming.bluetoothcollect.model.MessageEvent;
 import com.example.ming.bluetoothcollect.model.NotifyInfo;
@@ -14,45 +20,47 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class SettingService {
 
     private static AnalysisTool analysisClient = AnalysisManager.getClient();
 
-    public static void SaveBleNotifyData(String address, byte[] value) {
+    public static void SaveBleNotifyData(ThreadPoolExecutor threadPoolExecutor,Handler mHandler, String address, byte[] value) {
         MessageEvent event = analysisClient.TryParse(value);
         switch (event.getType()) {
             case TimeBack:
-                TimeBackThread time = new TimeBackThread(event.getMessage());
+                TimeBackThread time = new TimeBackThread(event.getMessage(),mHandler);
                 Thread timeThread = new Thread(time);
-                timeThread.start();    // 启动多线程
+                threadPoolExecutor.execute(timeThread);
                 break;
-            case BatteryBack:
-                BatteryBackThread battery = new BatteryBackThread(event.getMessage());
-                Thread batteryThread = new Thread(battery);
-                batteryThread.start();    // 启动多线程
-                break;
-            case ReceiveBack:
-                ReceiveBackThread receive = new ReceiveBackThread(event.getMessage());
-                Thread receiveThread = new Thread(receive);
-                receiveThread.start();    // 启动多线程
-                break;
-            case RealData:
-                RealDataThread real = new RealDataThread(event.getMessage(),address);
-                Thread realThread = new Thread(real);
-                realThread.start();    // 启动多线程
-                break;
-            case HistoryData:
-                HistoryDataThread history = new HistoryDataThread(event.getMessage(),address);
-                Thread historyThread = new Thread(history);
-                historyThread.start();    // 启动多线程
-                break;
-            case ErrorData:
-                ErrorDataThread error = new ErrorDataThread(event.getMessage());
-                Thread errorThread = new Thread(error);
-                errorThread.start();    // 启动多线程
-                break;
+//            case BatteryBack:
+//                BatteryBackThread battery = new BatteryBackThread(event.getMessage());
+//                Thread batteryThread = new Thread(battery);
+//                threadPoolExecutor.execute(batteryThread);
+//                break;
+//            case ReceiveBack:
+//                ReceiveBackThread receive = new ReceiveBackThread(event.getMessage());
+//                Thread receiveThread = new Thread(receive);
+//                threadPoolExecutor.execute(receiveThread);
+//                break;
+//            case RealData:
+//                RealDataThread real = new RealDataThread(event.getMessage(),address);
+//                Thread realThread = new Thread(real);
+//                threadPoolExecutor.execute(realThread);
+//                break;
+//            case HistoryData:
+//                HistoryDataThread history = new HistoryDataThread(event.getMessage(),address);
+//                Thread historyThread = new Thread(history);
+//                threadPoolExecutor.execute(historyThread);
+//                break;
+//            case ErrorData:
+//                ErrorDataThread error = new ErrorDataThread(event.getMessage());
+//                Thread errorThread = new Thread(error);
+//                threadPoolExecutor.execute(errorThread);
+//                break;
         }
     }
 }
@@ -61,14 +69,23 @@ public class SettingService {
 class TimeBackThread implements Runnable { // 实现Runnable接口，作为线程的实现类
     private byte[] value;       // 表示线程的名称
 
-    public TimeBackThread(byte[] value) {
+    private Handler mHandler;
+
+    public TimeBackThread(byte[] value,Handler mHandler) {
         this.value = value;      // 通过构造方法配置name属性
+        this.mHandler=mHandler;
     }
 
     public void run() {  // 覆写run()方法，作为线程 的操作主体
         DbController mClient = DbManager.getClient();
-        Date d1 = StringTool.getDataByBytes(value, 1);
-        mClient.updateDeviceInfo(d1, null);
+        Date data = StringTool.getDataByBytes(value, 1);
+        mHandler.sendEmptyMessage(0);
+        //需要数据传递，用下面方法；
+        Message msg =new Message();
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String dateString = formatter.format(data);
+        msg.obj = dateString;//可以是基本类型，可以是对象，可以是List、map等；
+        mHandler.sendMessage(msg);
     }
 };
 
@@ -83,7 +100,6 @@ class BatteryBackThread implements Runnable { // 实现Runnable接口，作为�
     public void run() {  // 覆写run()方法，作为线程 的操作主体
         DbController mClient = DbManager.getClient();
         Double d1 = StringTool.getBatteryByBytes(value);
-        mClient.updateDeviceInfo(null, d1);
     }
 };
 

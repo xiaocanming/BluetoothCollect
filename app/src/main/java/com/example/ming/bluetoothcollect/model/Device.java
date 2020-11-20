@@ -13,12 +13,6 @@ public class Device {
 
     private DeviceService collectdeviceservice;//0xFFE1
 
-    private Date time; //设备时间
-
-    private double battery;//电量
-
-    private boolean connectestate;//连接状态
-
     public String getAddress() {
         return address;
     }
@@ -51,29 +45,6 @@ public class Device {
         this.collectdeviceservice = collectdeviceservice;
     }
 
-    public Date getTime() {
-        return time;
-    }
-
-    public void setTime(Date time) {
-        this.time = time;
-    }
-
-    public double getBattery() {
-        return battery;
-    }
-
-    public void setBattery(double battery) {
-        this.battery = battery;
-    }
-
-    public boolean isConnectestate() {
-        return connectestate;
-    }
-
-    public void setConnectestate(boolean connectestate) {
-        this.connectestate = connectestate;
-    }
 }
 
 

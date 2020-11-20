@@ -98,25 +98,6 @@ public class DbController {
         deviceDetailInfoDao.insertInTx(deviceDetailInfoList);
     }
 
-    /**
-     * 修改蓝牙信息
-     * @param time
-     * @param battery
-     */
-    public void updateDeviceInfo(Date time,Double battery){
-        //获取设备信息
-        DeviceInfo deviceInfos = deviceInfoDao.queryBuilder().build().unique();//拿到之前的记录
-        if(deviceInfos!=null){
-            if(time!=null){
-                deviceInfos.setTime(time);
-
-            }
-            if(battery!=null){
-                deviceInfos.setBattery(battery);
-            }
-        }
-        deviceInfoDao.update(deviceInfos);
-    }
 
     /**
      * 获取正在使用的蓝牙设备
@@ -154,20 +135,20 @@ public class DbController {
     }
 
 
-    /**
-     * 新增通知消息
-     * @param notifyInfo
-     */
-    public void insertNotifyInfo(NotifyInfo notifyInfo){
-        notifyInfoDao.insert(notifyInfo);
-    }
-
-    /**
-     * 按条件查询通知消息
-     */
-    public List<NotifyInfo> searchNotifyInfoByWhere(String address){
-        List<NotifyInfo>notifyInfos = (List<NotifyInfo>) notifyInfoDao.queryBuilder().where(NotifyInfoDao.Properties.Address.eq(address)).list();
-        return notifyInfos;
-    }
+//    /**
+//     * 新增通知消息
+//     * @param notifyInfo
+//     */
+//    public void insertNotifyInfo(NotifyInfo notifyInfo){
+//        notifyInfoDao.insert(notifyInfo);
+//    }
+//
+//    /**
+//     * 按条件查询通知消息
+//     */
+//    public List<NotifyInfo> searchNotifyInfoByWhere(String address){
+//        List<NotifyInfo>notifyInfos = (List<NotifyInfo>) notifyInfoDao.queryBuilder().where(NotifyInfoDao.Properties.Address.eq(address)).list();
+//        return notifyInfos;
+//    }
 
 }
