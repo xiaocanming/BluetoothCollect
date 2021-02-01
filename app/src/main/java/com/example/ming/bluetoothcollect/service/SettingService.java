@@ -98,7 +98,7 @@ class BatteryBackThread implements Runnable { // 实现Runnable接口，作为�
 
     public void run() {  // 覆写run()方法，作为线程 的操作主体
         Double d1 = StringTool.getBatteryByBytes(value);
-        mHandler.sendEmptyMessage(1);
+         mHandler.sendEmptyMessage(1);
         //需要数据传递，用下面方法；
         Message msg = new Message();
         msg.what=1;
@@ -137,7 +137,6 @@ class RealDataThread implements Runnable { // 实现Runnable接口，作为线�
         Date startDate = StringTool.getDataByBytes(value, 0);
         List<NotifyInfo> NotifyInfoList = new ArrayList<>();
         for (int i = 8; i < value.length - 8; i = i + 2) {
-            //判断时间为白天还是晚上
             NotifyInfo info = new NotifyInfo();
             info.setType(1);
             info.setTime(startDate);

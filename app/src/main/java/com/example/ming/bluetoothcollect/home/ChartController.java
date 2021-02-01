@@ -113,7 +113,7 @@ public class ChartController extends HomeController {
             @Override
             public void onTimeSelect(Date date, View v) {//选中事件回调
                 curDate = date;
-                SimpleDateFormat formatter = new SimpleDateFormat("MM-dd");
+                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
                 String dateString = formatter.format(curDate);
                 mTopBar.setTitle("血糖值记录"+"("+dateString+")");
                 setData();
@@ -178,16 +178,16 @@ public class ChartController extends HomeController {
             yAxis.setDrawGridLines(false);
 
             // axis range
-            yAxis.setAxisMaximum(30f);
+            yAxis.setAxisMaximum(600f);
             yAxis.setAxisMinimum(0f);
         }
         //设置限制线
         {
-            LimitLine ll1 = new LimitLine(20f);
+            LimitLine ll1 = new LimitLine(450f);
             ll1.setLineWidth(1f);
             ll1.enableDashedLine(10f, 10f, 0f);
 
-            LimitLine ll2 = new LimitLine(10f);
+            LimitLine ll2 = new LimitLine(150f);
             ll2.setLineWidth(1f);
             ll2.enableDashedLine(10f, 10f, 0f);
 
